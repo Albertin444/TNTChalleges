@@ -1,0 +1,58 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-image: url('fondo.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 90%;
+    width: 400px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.7);
+}
+
+h1, h2 {
+    margin-bottom: 10px;
+}
+
+#tnt {
+    width: 60%;
+    max-width: 200px;
+    height: auto;
+    margin: 20px 0;
+    cursor: pointer;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+    width: 80%;
+    max-width: 250px;
+    font-size: 1em;
+}
+
+table {
+    width: 100%;
+    margin-top: 15px;
+    color: white;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+}
