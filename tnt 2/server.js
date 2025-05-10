@@ -97,21 +97,15 @@ app.post('/save-score', async (req, res) => {
 app.post('/register', async (req, res) => {
     const { Usuario: nombre, Correo, Puntaje, Contrasena } = req.body;
 
-    console.log(req.body);  // Agrega esto para ver lo que llega del frontend
-
+    // Validamos que no falten datos
     if (!nombre || !Correo || Puntaje == null || !Contrasena) {
         return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
 
     try {
-        const nuevoUsuario = new Usuario({
-            nombre,
-            Correo,
-            Contrasena,
-            Puntaje: 0, // Puntaje inicial
-        });
-
-        await nuevoUsuario.save();// Guardamos en MongoDB
+        // Creamos un nuevo documento con los datos recibidos
+        const nuevoUsuario = new Usuario({ Usuario: nombre, Correo, Puntaje, Contrasena });
+        await nuevoUsuario.save(); // Guardamos en MongoDB
         res.status(200).json({ success: true, message: 'Usuario registrado correctamente' });
     } catch (error) {
         console.error('Error al registrar usuario:', error);
