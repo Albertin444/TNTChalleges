@@ -37,7 +37,7 @@
         const scoreTableBody = document.getElementById('scoreTableBody');
 
         let clicks = 0;
-        let time = 3;
+        let time = 20;
         let interval;
 
         // Evento de click sobre el TNT
@@ -51,9 +51,9 @@
         // Evento de inicio del juego
         startBtn.addEventListener("click", () => {
             clicks = 0;
-            time = 3;
+            time = 20;
             clicksDisplay.textContent = "0";
-            timeDisplay.textContent = "3";
+            timeDisplay.textContent = "20";
             startBtn.disabled = true;
             saveBtn.disabled = true;
 

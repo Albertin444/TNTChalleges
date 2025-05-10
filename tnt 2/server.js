@@ -111,12 +111,13 @@ app.post('/register', async (req, res) => {
             Puntaje: 0, // Puntaje inicial
         });
 
-        await nuevoUsuario.save// Guardamos en MongoDB
+        await nuevoUsuario.save();// Guardamos en MongoDB
         res.status(200).json({ success: true, message: 'Usuario registrado correctamente' });
     } catch (error) {
         console.error('Error al registrar usuario:', error);
         res.status(500).json({ error: 'Error al registrar usuario' });
     }
+
 });
 
 
