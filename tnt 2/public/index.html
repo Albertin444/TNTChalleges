@@ -19,41 +19,23 @@
             <form id="loginForm" style="display:none;">
                 <input type="text" id="loginUser" placeholder="Nombre de usuario">
                 <input type="password" id="loginPassword" placeholder="Contraseña">
-                <button type="submit">Iniciar sesión</button>
+                <button type="submit">Enviar</button>
+
             </form>
 
             <form id="registerForm" style="display:none;">
                 <input type="text" id="registerUser" placeholder="Nombre de usuario">
                 <input type="email" id="registerEmail" placeholder="Correo electrónico">
                 <input type="password" id="registerPassword" placeholder="Contraseña">
-                <button type="submit">Registrar</button>
+                <button type="submit">Enviar</button>
             </form>
         </div>
 
-        <!-- Juego -->
-        <div id="gameSection" style="display:none;">
-            <h2>Juego TNT</h2>
-            <img id="tnt" src="tnt.png" alt="TNT">
-            <p>Clics: <span id="clicks">0</span></p>
-            <p>Tiempo restante: <span id="time">20</span> segundos</p>
-            <button id="startBtn">Iniciar</button>
-            <input type="text" id="nameInput" placeholder="Tu nombre">
-            <button id="saveBtn" disabled>Guardar puntaje</button>
-
-            <h2>Tabla de puntajes</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Puntaje</th>
-                    </tr>
-                </thead>
-                <tbody id="scoreTable"></tbody>
-            </table>
-        </div>
     </div>
 
     <script src="game.js"></script> <!-- Incluye el juego -->
+
+
     <script>
         // Aquí se manejarán los botones de registro e inicio de sesión
         const registerBtn = document.getElementById("registerBtn");
@@ -77,7 +59,7 @@
         // Función para registrar un nuevo usuario
         const registerUser = async (userData) => {
             try {
-                const response = await fetch('http://localhost:3000/save-score', {
+                const response = await fetch('http://localhost:3000/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -86,9 +68,10 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
+                    
+                    localStorage.setItem('usuarioActual', userData.Usuario); // En loginUser
+                    window.location.href = "game.html";
                     alert('Usuario registrado correctamente');
-                    gameSection.style.display = "block"; // Mostrar la sección del juego
-                    registerForm.style.display = "none"; // Ocultar el formulario de registro
                 } else {
                     alert('Error al registrar: ' + data.error);
                 }
@@ -123,8 +106,8 @@
                 const data = await response.json();
                 if (response.ok) {
                     alert('Inicio de sesión exitoso');
-                    gameSection.style.display = "block"; // Mostrar la sección del juego
-                    loginForm.style.display = "none"; // Ocultar el formulario de inicio de sesión
+                    localStorage.setItem('usuarioActual', loginData.Usuario); // En loginUser
+                    window.location.href = "game.html";
                 } else {
                     alert('Error al iniciar sesión: ' + data.error);
                 }

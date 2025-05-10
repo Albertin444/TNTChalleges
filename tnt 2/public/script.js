@@ -46,7 +46,14 @@ saveBtn.addEventListener("click", async () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username: name, score: clicks })
+
+            body: JSON.stringify({
+                Usuario: name,
+                Correo: "sincorreo@mail.com",     // Si no lo necesitas, puedes poner un valor dummy
+                Contrasena: "1234",               // Igual aquí, poner cualquier valor dummy
+                Puntaje: clicks
+            })
+
         });
 
         const result = await response.json();
@@ -63,3 +70,63 @@ saveBtn.addEventListener("click", async () => {
         saveBtn.disabled = true;
     }
 });
+
+
+<script>
+  // Puedes obtenerlo de localStorage, de una variable global o asignarlo manualmente:
+    const usuarioActual = "Tan"; // Ejemplo: nombre que ya tienes del jugador
+
+  document.addEventListener("DOMContentLoaded", () => {
+        // Mostrar el nombre en pantalla
+        document.getElementById("nombreUsuario").textContent = usuarioActual;
+  });
+</script>
+
+
+//puntaje buscar
+fetch('/scores')
+    .then(response => response.json())
+    .then(data => {
+        const scoreTable = document.getElementById("scoreTable"); // asegúrate de que existe en el HTML
+        scoreTable.innerHTML = "";
+        data.forEach(usuario => {
+            const row = document.createElement("tr");
+            const nameCell = document.createElement("td");
+            const scoreCell = document.createElement("td");
+
+            nameCell.textContent = usuario.Usuario;
+            scoreCell.textContent = usuario.Puntaje;
+
+            row.appendChild(nameCell);
+            row.appendChild(scoreCell);
+            scoreTable.appendChild(row);
+        });
+    })
+    .catch(error => {
+        console.error("Error al cargar puntajes:", error);
+    });
+
+function guardarPuntaje(puntajeFinal) {
+    const usuario = localStorage.getItem('usuarioActual');
+    if (!usuario) {
+        alert('Usuario no autenticado');
+        return;
+    }
+
+    fetch('http://localhost:3000/update-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ Usuario: usuario, Puntaje: puntajeFinal }),
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok) {
+                alert('Puntaje guardado con éxito');
+            } else {
+                alert('Error al guardar puntaje: ' + data.error);
+            }
+        })
+        .catch(err => console.error('Error al enviar puntaje:', err));
+}
+
+

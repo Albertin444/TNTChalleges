@@ -13,19 +13,19 @@
         <p>Clics: <span id="clicks">0</span></p>
         <p>Tiempo restante: <span id="time">20</span> segundos</p>
         <button id="startBtn">Iniciar</button>
-        <input type="text" id="nameInput" placeholder="Tu nombre">
+        <p>Jugador actual: <span id="nombreUsuario"></span></p>
         <button id="saveBtn" disabled>Guardar puntaje</button>
 
-        <h2>Tabla de puntajes</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Puntaje</th>
-                </tr>
-            </thead>
-            <tbody id="scoreTable"></tbody>
-        </table>
+        <!-- Aquí es donde está la tabla con los puntajes -->
+        <div id="scoreboard">
+            <h2>Top 10 Puntajes</h2>
+            <table>
+                <thead>
+                    <tr><th>Usuario</th><th>Puntaje</th></tr>
+                </thead>
+                <tbody id="scoreTableBody"></tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -34,13 +34,13 @@
         const timeDisplay = document.getElementById("time");
         const startBtn = document.getElementById("startBtn");
         const saveBtn = document.getElementById("saveBtn");
-        const nameInput = document.getElementById("nameInput");
-        const scoreTable = document.getElementById("scoreTable");
+        const scoreTableBody = document.getElementById('scoreTableBody');
 
         let clicks = 0;
-        let time = 20;
+        let time = 3;
         let interval;
 
+        // Evento de click sobre el TNT
         tnt.addEventListener("click", () => {
             if (time > 0) {
                 clicks++;
@@ -48,18 +48,20 @@
             }
         });
 
+        // Evento de inicio del juego
         startBtn.addEventListener("click", () => {
             clicks = 0;
-            time = 20;
+            time = 3;
             clicksDisplay.textContent = "0";
-            timeDisplay.textContent = "20";
+            timeDisplay.textContent = "3";
             startBtn.disabled = true;
             saveBtn.disabled = true;
-            nameInput.value = "";
 
             interval = setInterval(() => {
                 time--;
                 timeDisplay.textContent = time;
+                actualizarTextoBoton(); // Verificar si se puede guardar el puntaje
+
                 if (time === 0) {
                     clearInterval(interval);
                     saveBtn.disabled = false;
@@ -67,21 +69,85 @@
             }, 1000);
         });
 
-        saveBtn.addEventListener("click", () => {
-            const name = nameInput.value.trim();
-            if (name) {
-                const row = document.createElement("tr");
-                const nameCell = document.createElement("td");
-                const scoreCell = document.createElement("td");
-                nameCell.textContent = name;
-                scoreCell.textContent = clicks;
-                row.appendChild(nameCell);
-                row.appendChild(scoreCell);
-                scoreTable.appendChild(row);
-                startBtn.disabled = false;
-                saveBtn.disabled = true;
-            }
+        // Obtener usuario al cargar la página
+        document.addEventListener("DOMContentLoaded", () => {
+            const usuarioActual = localStorage.getItem("usuarioActual") || "Invitado";
+            document.getElementById("nombreUsuario").textContent = usuarioActual;
+            cargarPuntajes(); // Cargar puntajes cuando se cargue la página
         });
+
+        // Guardar puntaje
+        saveBtn.addEventListener("click", async () => {
+            try {
+                const usuario = localStorage.getItem("usuarioActual");
+                console.log("Enviando datos:", { Usuario: usuario, Puntaje: clicks });
+
+                const res = await fetch('http://localhost:3000/save-score', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        Usuario: usuario,
+                        Puntaje: clicks
+                    })
+                });
+
+                const result = await res.json();
+                console.log('Resultado de la respuesta:', result);
+
+                if (result.success) {
+                    await cargarPuntajes();
+                }
+
+            } catch (err) {
+                console.error("Error al guardar puntaje:", err);
+            }
+            startBtn.disabled = false;
+            saveBtn.disabled = true;
+        });
+
+        // Función para actualizar el texto del botón "Guardar"
+        async function actualizarTextoBoton() {
+            const usuario = localStorage.getItem("usuarioActual");
+            if (!usuario) return;
+
+            try {
+                const res = await fetch(`http://localhost:3000/scores/${usuario}`);
+                const data = await res.json();
+                if (data && data.Puntaje !== undefined) {
+                    if (clicks > data.Puntaje) {
+                        saveBtn.textContent = "Guardar";
+                    } else {
+                        saveBtn.textContent = "Reintentar";
+                    }
+                }
+            } catch (error) {
+                console.error("Error al actualizar texto del botón:", error);
+            }
+        }
+
+        // Cargar los puntajes desde el servidor
+        async function cargarPuntajes() {
+            try {
+                const response = await fetch('http://localhost:3000/scores'); // Asegúrate de usar la URL correcta aquí
+                const datos = await response.json();
+                scoreTableBody.innerHTML = ''; // Limpiar tabla actual
+
+                datos.forEach(usuario => {
+                    const row = document.createElement("tr");
+                    const nameCell = document.createElement("td");
+                    const scoreCell = document.createElement("td");
+
+                    nameCell.textContent = usuario.Usuario;
+                    scoreCell.textContent = usuario.Puntaje;
+
+                    row.appendChild(nameCell);
+                    row.appendChild(scoreCell);
+                    scoreTableBody.appendChild(row);
+                });
+            } catch (err) {
+                console.error("Error al cargar puntajes:", err);
+            }
+        }
     </script>
 </body>
 </html>

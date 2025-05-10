@@ -66,24 +66,62 @@ const Usuario = mongoose.model('Usuario', usuarioSchema);
  * }
  */
 app.post('/save-score', async (req, res) => {
-    // Extraemos los datos del cuerpo de la solicitud
+    console.log('Petición recibida en /save-score');
+    const { Usuario: usuario, Puntaje } = req.body;
+
+    try {
+        // Busca el usuario en la base de datos
+        const user = await Usuario.findOne({ Usuario: usuario });
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        }
+
+        // Solo actualiza si el puntaje recibido es mayor que el almacenado
+        if (Puntaje > user.Puntaje) {
+            user.Puntaje = Puntaje;
+            await user.save();
+            return res.status(200).json({ success: true, message: 'Puntaje actualizado' });
+        } else {
+            return res.status(400).json({ success: false, message: 'El puntaje no es mayor que el actual' });
+        }
+
+    } catch (error) {
+        console.error('Error al actualizar el puntaje:', error);
+        res.status(500).json({ success: false, error: 'Error al actualizar puntaje' });
+    }
+});
+
+
+
+app.post('/register', async (req, res) => {
     const { Usuario: nombre, Correo, Puntaje, Contrasena } = req.body;
 
-    // Validamos que no falten datos
+    console.log(req.body);  // Agrega esto para ver lo que llega del frontend
+
     if (!nombre || !Correo || Puntaje == null || !Contrasena) {
         return res.status(400).json({ error: 'Faltan campos requeridos' });
     }
 
     try {
-        // Creamos un nuevo documento con los datos recibidos
-        const nuevoUsuario = new Usuario({ Usuario: nombre, Correo, Puntaje, Contrasena });
-        await nuevoUsuario.save(); // Guardamos en MongoDB
-        res.status(201).json({ message: 'Puntaje guardado exitosamente' });
-    } catch (err) {
-        console.error('Error al guardar:', err);
-        res.status(500).json({ error: 'Error al guardar el puntaje' });
+        const nuevoUsuario = new Usuario({
+            nombre,
+            Correo,
+            Contrasena,
+            Puntaje: 0, // Puntaje inicial
+        });
+
+        await nuevoUsuario.save// Guardamos en MongoDB
+        res.status(200).json({ success: true, message: 'Usuario registrado correctamente' });
+    } catch (error) {
+        console.error('Error al registrar usuario:', error);
+        res.status(500).json({ error: 'Error al registrar usuario' });
     }
 });
+
+
+
+
 
 /**
  * GET /scores
@@ -146,5 +184,58 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
+
+app.get('/get-session', (req, res) => {
+    res.json({ user: req.session.user || null });
+});
+
+
+app.post('/update-score', async (req, res) => {
+    const { Usuario, Puntaje } = req.body;
+
+    if (!Usuario || Puntaje == null) {
+        return res.status(400).json({ error: 'Faltan datos' });
+    }
+
+    try {
+        const user = await Usuario.findOne({ Usuario });
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        // Solo actualiza si el nuevo puntaje es mayor
+        if (Puntaje > user.Puntaje) {
+            user.Puntaje = Puntaje;
+            await user.save();
+        }
+
+        res.json({ ok: true, message: 'Puntaje actualizado' });
+
+    } catch (err) {
+        console.error('Error al actualizar puntaje:', err);
+        res.status(500).json({ error: 'Error al actualizar el puntaje' });
+    }
+});
+
+app.get('/scores/:usuario', async (req, res) => {
+    const { usuario } = req.params;
+
+    try {
+        const user = await Usuario.findOne({ Usuario: usuario });
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        res.json({ Usuario: user.Usuario, Puntaje: user.Puntaje });
+    } catch (err) {
+        console.error('Error al buscar usuario:', err);
+        res.status(500).json({ error: 'Error al obtener el puntaje' });
+    }
+});
+
+
+
+
 
 

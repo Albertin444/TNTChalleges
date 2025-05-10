@@ -56,3 +56,21 @@ th, td {
     padding: 5px;
     border-bottom: 1px solid #ddd;
 }
+
+#saveBtn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+    #saveBtn[disabled] {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    #saveBtn:hover:not([disabled]) {
+        background-color: #218838;
+    }
+
